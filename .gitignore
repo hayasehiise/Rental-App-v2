@@ -1,0 +1,15 @@
+# Node
+frontend/node_modules/
+backend/node_modules/
+
+# Logs
+*.log
+
+# Build
+frontend/.tanstack/
+frontend/node_modules/
+backend/node_modules/
+
+# Env
+frontend/.env
+backend/.env
