@@ -19,7 +19,7 @@ import { UpdateRentalCategoryDto } from './dto/update-rental-category.dto';
 
 @Controller('rental-categories')
 export class RentalCategoryController {
-  constructor(private categoryService: RentalCategoryService) {}
+  constructor(private readonly categoryService: RentalCategoryService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN, UserRole.STAFF_ADMIN)

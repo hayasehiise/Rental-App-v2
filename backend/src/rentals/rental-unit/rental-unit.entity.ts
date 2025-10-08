@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Rental } from '../rental/rental.entity';
 import { RentalPrice } from '../rental-price/rental-price.entity';
@@ -28,4 +30,10 @@ export class RentalUnit {
 
   @OneToMany(() => RentalImage, (image) => image.unit)
   images: RentalImage[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updateAt: Date;
 }

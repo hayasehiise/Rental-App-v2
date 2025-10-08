@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { RentalCategory } from './rental-category.entity';
 import { CreateRentalCategoryDto } from './dto/create-rental-category.dto';
@@ -12,9 +16,24 @@ export class RentalCategoryService {
     private categoryRepo: Repository<RentalCategory>,
   ) {}
 
-  async create(dto: CreateRentalCategoryDto): Promise<RentalCategory> {
+  async create(
+    dto: CreateRentalCategoryDto,
+  ): Promise<{ message: string; data: RentalCategory }> {
+    const existing = await this.categoryRepo.findOne({
+      where: { name: dto.name },
+    });
+
+    if (existing) {
+      throw new ConflictException(`Category Name ${dto.name} Already Exists`);
+    }
+
     const category = this.categoryRepo.create(dto);
-    return this.categoryRepo.save(category);
+    const save = await this.categoryRepo.save(category);
+
+    return {
+      message: 'Data berhasil ditambahkan',
+      data: save,
+    };
   }
 
   async findAll(): Promise<RentalCategory[]> {
@@ -29,6 +48,7 @@ export class RentalCategoryService {
       where: { id },
       relations: ['rentals'],
     });
+
     if (!category) {
       throw new NotFoundException('Category Not Found');
     }
@@ -39,7 +59,15 @@ export class RentalCategoryService {
   async update(
     id: number,
     dto: UpdateRentalCategoryDto,
-  ): Promise<RentalCategory> {
+  ): Promise<{ message: string; data: RentalCategory }> {
+    const existing = await this.categoryRepo.findOne({
+      where: { name: dto.name },
+    });
+
+    if (existing) {
+      throw new ConflictException(`Category Name ${dto.name} Already Exists`);
+    }
+
     const category = await this.categoryRepo.preload({
       id,
       ...dto,
@@ -49,10 +77,15 @@ export class RentalCategoryService {
       throw new NotFoundException('Rental Category not found');
     }
 
-    return this.categoryRepo.save(category);
+    const save = await this.categoryRepo.save(category);
+
+    return {
+      message: 'Data berhasil diupdate',
+      data: save,
+    };
   }
 
-  async remove(id: number): Promise<RentalCategory> {
+  async remove(id: number): Promise<{ message: string; data: RentalCategory }> {
     const category = await this.categoryRepo.findOne({
       where: { id },
     });
@@ -61,6 +94,11 @@ export class RentalCategoryService {
       throw new NotFoundException('Rental Category not found');
     }
 
-    return this.categoryRepo.remove(category);
+    const remove = await this.categoryRepo.remove(category);
+
+    return {
+      message: 'Data berhasil dihapus',
+      data: remove,
+    };
   }
 }
