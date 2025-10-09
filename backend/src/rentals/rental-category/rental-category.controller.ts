@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RentalCategoryService } from './rental-category.service';
@@ -29,13 +30,18 @@ export class RentalCategoryController {
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.categoryService.findOne(id);
+  find(
+    @Query('search') search?: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('showAll') showAll?: boolean,
+  ) {
+    return this.categoryService.find({
+      search,
+      page: page ? +page : undefined,
+      limit: limit ? +limit : undefined,
+      showAll,
+    });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

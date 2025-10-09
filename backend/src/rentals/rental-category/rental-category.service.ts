@@ -1,25 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { RentalCategory } from './rental-category.entity';
 import { CreateRentalCategoryDto } from './dto/create-rental-category.dto';
 import { UpdateRentalCategoryDto } from './dto/update-rental-category.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { RentalCategoryRepository } from './rental-category.repository';
 
 @Injectable()
 export class RentalCategoryService {
-  constructor(
-    @InjectRepository(RentalCategory)
-    private categoryRepo: Repository<RentalCategory>,
-  ) {}
+  constructor(private categoryRepository: RentalCategoryRepository) {}
 
   async create(
     dto: CreateRentalCategoryDto,
   ): Promise<{ message: string; data: RentalCategory }> {
-    const existing = await this.categoryRepo.findOne({
+    const existing = await this.categoryRepository['categoryRepo'].findOne({
       where: { name: dto.name },
     });
 
@@ -27,8 +24,8 @@ export class RentalCategoryService {
       throw new ConflictException(`Category Name ${dto.name} Already Exists`);
     }
 
-    const category = this.categoryRepo.create(dto);
-    const save = await this.categoryRepo.save(category);
+    const category = this.categoryRepository['categoryRepo'].create(dto);
+    const save = await this.categoryRepository['categoryRepo'].save(category);
 
     return {
       message: 'Data berhasil ditambahkan',
@@ -36,31 +33,15 @@ export class RentalCategoryService {
     };
   }
 
-  async findAll(): Promise<RentalCategory[]> {
-    return this.categoryRepo.find({
-      relations: ['rentals'],
-      order: { id: 'ASC' },
-    });
-  }
-
-  async findOne(id: number): Promise<RentalCategory> {
-    const category = await this.categoryRepo.findOne({
-      where: { id },
-      relations: ['rentals'],
-    });
-
-    if (!category) {
-      throw new NotFoundException('Category Not Found');
-    }
-
-    return category;
+  async find(filters: any) {
+    return this.categoryRepository.findAll(filters);
   }
 
   async update(
     id: number,
     dto: UpdateRentalCategoryDto,
   ): Promise<{ message: string; data: RentalCategory }> {
-    const existing = await this.categoryRepo.findOne({
+    const existing = await this.categoryRepository['categoryRepo'].findOne({
       where: { name: dto.name },
     });
 
@@ -68,7 +49,7 @@ export class RentalCategoryService {
       throw new ConflictException(`Category Name ${dto.name} Already Exists`);
     }
 
-    const category = await this.categoryRepo.preload({
+    const category = await this.categoryRepository['categoryRepo'].preload({
       id,
       ...dto,
     });
@@ -77,7 +58,7 @@ export class RentalCategoryService {
       throw new NotFoundException('Rental Category not found');
     }
 
-    const save = await this.categoryRepo.save(category);
+    const save = await this.categoryRepository['categoryRepo'].save(category);
 
     return {
       message: 'Data berhasil diupdate',
@@ -86,7 +67,7 @@ export class RentalCategoryService {
   }
 
   async remove(id: number): Promise<{ message: string; data: RentalCategory }> {
-    const category = await this.categoryRepo.findOne({
+    const category = await this.categoryRepository['categoryRepo'].findOne({
       where: { id },
     });
 
@@ -94,7 +75,8 @@ export class RentalCategoryService {
       throw new NotFoundException('Rental Category not found');
     }
 
-    const remove = await this.categoryRepo.remove(category);
+    const remove =
+      await this.categoryRepository['categoryRepo'].remove(category);
 
     return {
       message: 'Data berhasil dihapus',

@@ -15,6 +15,8 @@ import { RentalController } from './rental/rental.controller';
 import { RentalUnitController } from './rental-unit/rental-unit.controller';
 import { RentalPriceController } from './rental-price/rental-price.controller';
 import { RentalImageController } from './rental-image/rental-image.controller';
+import { RentalRepository } from './rental/rental.repository';
+import { RentalCategoryRepository } from './rental-category/rental-category.repository';
 
 @Module({
   imports: [
@@ -35,7 +37,9 @@ import { RentalImageController } from './rental-image/rental-image.controller';
   ],
   providers: [
     RentalCategoryService,
+    RentalCategoryRepository,
     RentalService,
+    RentalRepository,
     RentalUnitService,
     RentalPriceService,
     RentalImageService,

@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RentalService } from './rental.service';
@@ -29,13 +30,20 @@ export class RentalController {
   }
 
   @Get()
-  findAll() {
-    return this.rentalService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.rentalService.findOne(id);
+  find(
+    @Query('search') search?: string,
+    @Query('categoryId') categoryId?: number,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('showAll') showAll?: boolean,
+  ) {
+    return this.rentalService.find({
+      search,
+      categoryId: categoryId ? +categoryId : undefined,
+      page: page ? +page : undefined,
+      limit: limit ? +limit : undefined,
+      showAll: showAll ?? undefined,
+    });
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

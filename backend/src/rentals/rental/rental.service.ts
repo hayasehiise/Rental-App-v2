@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   ConflictException,
   Injectable,
@@ -9,12 +10,12 @@ import { Repository } from 'typeorm';
 import { RentalCategory } from '../rental-category/rental-category.entity';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { UpdateRentalDto } from './dto/update-rental.dto';
+import { RentalRepository } from './rental.repository';
 
 @Injectable()
 export class RentalService {
   constructor(
-    @InjectRepository(Rental)
-    private rentalRepo: Repository<Rental>,
+    private rentalRepository: RentalRepository,
     @InjectRepository(RentalCategory)
     private categoryRepo: Repository<RentalCategory>,
   ) {}
@@ -22,7 +23,7 @@ export class RentalService {
   async create(
     dto: CreateRentalDto,
   ): Promise<{ message: string; data: Rental }> {
-    const existing = await this.rentalRepo.findOne({
+    const existing = await this.rentalRepository['rentalRepo'].findOne({
       where: { name: dto.name },
     });
 
@@ -38,13 +39,13 @@ export class RentalService {
       throw new NotFoundException('Category not found');
     }
 
-    const rental = this.rentalRepo.create({
+    const rental = this.rentalRepository['rentalRepo'].create({
       name: dto.name,
       description: dto.description,
       category,
     });
 
-    const saved = await this.rentalRepo.save(rental);
+    const saved = await this.rentalRepository['rentalRepo'].save(rental);
 
     return {
       message: 'Data rental berhasil ditambahkan',
@@ -52,31 +53,12 @@ export class RentalService {
     };
   }
 
-  async findAll(): Promise<Rental[]> {
-    return this.rentalRepo.find({
-      relations: ['units', 'category'],
-      order: { id: 'ASC' },
-    });
+  async find(filters: any) {
+    return this.rentalRepository.findAll(filters);
   }
 
-  async findOne(id: number): Promise<Rental> {
-    const rental = await this.rentalRepo.findOne({
-      relations: ['units', 'category'],
-      where: { id },
-    });
-
-    if (!rental) {
-      throw new NotFoundException('Rental not found');
-    }
-
-    return rental;
-  }
-
-  async update(
-    id: number,
-    dto: UpdateRentalDto,
-  ): Promise<{ message: string; data: Rental }> {
-    const rental = await this.rentalRepo.findOne({
+  async update(id: number, dto: UpdateRentalDto) {
+    const rental = await this.rentalRepository['rentalRepo'].findOne({
       where: { id },
     });
 
@@ -85,7 +67,7 @@ export class RentalService {
     }
 
     if (dto.name && dto.name !== rental.name) {
-      const existing = await this.rentalRepo.findOne({
+      const existing = await this.rentalRepository['rentalRepo'].findOne({
         where: { name: dto.name },
       });
 
@@ -96,7 +78,7 @@ export class RentalService {
 
     Object.assign(rental, dto);
 
-    const updated = await this.rentalRepo.save(rental);
+    const updated = await this.rentalRepository['rentalRepo'].save(rental);
 
     return {
       message: 'Rental berhasil diupdate',
@@ -104,8 +86,8 @@ export class RentalService {
     };
   }
 
-  async remove(id: number): Promise<{ message: string; data: Rental }> {
-    const rental = await this.rentalRepo.findOne({
+  async remove(id: number) {
+    const rental = await this.rentalRepository['rentalRepo'].findOne({
       where: { id },
     });
 
@@ -113,7 +95,7 @@ export class RentalService {
       throw new NotFoundException('Rental not found');
     }
 
-    const removed = await this.rentalRepo.remove(rental);
+    const removed = await this.rentalRepository['rentalRepo'].remove(rental);
 
     return {
       message: 'Rental berhasil dihapus',
